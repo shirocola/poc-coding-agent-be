@@ -1,12 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { StockService } from '@/services';
-import {
-  ApiResponse,
-  StockBalance,
-  StockGrant,
-  VestingEvent,
-  Transaction,
-} from '@/models';
+import { ApiResponse, StockBalance, StockGrant, VestingEvent, Transaction } from '@/models';
 import logger from '@/logger';
 
 export class StockController {
@@ -28,7 +22,7 @@ export class StockController {
 
       // For employees, use their own employee ID from the token
       // For admins, allow querying by employeeId parameter
-      const employeeId = req.query.employeeId as string || req.user.userId;
+      const employeeId = (req.query.employeeId as string) || req.user.userId;
 
       const balance: StockBalance = await this.stockService.getStockBalance(employeeId);
 
@@ -55,7 +49,7 @@ export class StockController {
         return;
       }
 
-      const employeeId = req.query.employeeId as string || req.user.userId;
+      const employeeId = (req.query.employeeId as string) || req.user.userId;
       const grants: StockGrant[] = await this.stockService.getStockGrants(employeeId);
 
       res.status(200).json({
@@ -109,7 +103,7 @@ export class StockController {
         return;
       }
 
-      const employeeId = req.query.employeeId as string || req.user.userId;
+      const employeeId = (req.query.employeeId as string) || req.user.userId;
       const vestingEvents: VestingEvent[] = await this.stockService.getVestingSchedule(employeeId);
 
       res.status(200).json({
@@ -125,7 +119,11 @@ export class StockController {
    * GET /stock/transactions
    * Get employee transaction history
    */
-  getTransactionHistory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getTransactionHistory = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       if (!req.user) {
         res.status(401).json({
@@ -135,7 +133,7 @@ export class StockController {
         return;
       }
 
-      const employeeId = req.query.employeeId as string || req.user.userId;
+      const employeeId = (req.query.employeeId as string) || req.user.userId;
       const transactions: Transaction[] = await this.stockService.getTransactionHistory(employeeId);
 
       res.status(200).json({

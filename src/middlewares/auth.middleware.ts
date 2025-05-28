@@ -30,13 +30,13 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
   try {
     const decoded = JwtUtils.verifyToken(token);
     req.user = decoded;
-    
+
     logger.info('User authenticated', {
       userId: decoded.userId,
       email: decoded.email,
       endpoint: req.originalUrl,
     });
-    
+
     next();
   } catch (error) {
     logger.warn('Authentication failed', {
@@ -44,7 +44,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
       endpoint: req.originalUrl,
       token: token.substring(0, 20) + '...', // Log partial token for debugging
     });
-    
+
     res.status(403).json({
       success: false,
       error: 'Invalid or expired token',
@@ -72,7 +72,7 @@ export const authorize = (roles: UserRole[]) => {
         requiredRoles: roles,
         endpoint: req.originalUrl,
       });
-      
+
       res.status(403).json({
         success: false,
         error: 'Insufficient permissions',

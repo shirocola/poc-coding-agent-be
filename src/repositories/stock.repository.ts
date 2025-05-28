@@ -84,11 +84,11 @@ export class StockRepository {
 
     const totalVestingMonths = schedule.totalYears * 12;
     const sharesPerVesting = grant.totalShares / (totalVestingMonths - schedule.cliffMonths + 1);
-    
+
     // Cliff vesting
     const cliffDate = new Date(grant.grantDate);
     cliffDate.setMonth(cliffDate.getMonth() + schedule.cliffMonths);
-    
+
     const cliffShares = grant.totalShares * 0.25; // 25% at cliff
     this.vestingEvents.push({
       id: generateId(),
@@ -106,10 +106,11 @@ export class StockRepository {
     for (let month = schedule.cliffMonths + 1; month <= totalVestingMonths; month++) {
       const vestingDate = new Date(grant.grantDate);
       vestingDate.setMonth(vestingDate.getMonth() + month);
-      
-      const monthlyShares = (grant.totalShares - cliffShares) / (totalVestingMonths - schedule.cliffMonths);
+
+      const monthlyShares =
+        (grant.totalShares - cliffShares) / (totalVestingMonths - schedule.cliffMonths);
       cumulativeVested += monthlyShares;
-      
+
       this.vestingEvents.push({
         id: generateId(),
         employeeId: grant.employeeId,
@@ -170,7 +171,9 @@ export class StockRepository {
     return this.transactions.filter(transaction => transaction.employeeId === employeeId);
   }
 
-  async createTransaction(transactionData: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>): Promise<Transaction> {
+  async createTransaction(
+    transactionData: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<Transaction> {
     const transaction: Transaction = {
       ...transactionData,
       id: generateId(),
@@ -189,18 +192,22 @@ export class StockRepository {
     const transactions = await this.findTransactionsByEmployeeId(employeeId);
 
     const totalGranted = grants.reduce((sum, grant) => sum + grant.totalShares, 0);
-    
+
     const totalVested = vestingEvents
       .filter(event => event.status === VestingEventStatus.VESTED)
       .reduce((sum, event) => sum + event.sharesVested, 0);
 
     const totalExercised = transactions
-      .filter(tx => tx.transactionType === TransactionType.EXERCISE && tx.status === TransactionStatus.COMPLETED)
+      .filter(
+        tx =>
+          tx.transactionType === TransactionType.EXERCISE &&
+          tx.status === TransactionStatus.COMPLETED
+      )
       .reduce((sum, tx) => sum + tx.shares, 0);
 
     const availableToExercise = totalVested - totalExercised;
     const unvested = totalGranted - totalVested;
-    
+
     // Mock current stock price
     const currentStockPrice = 25.0;
     const currentValue = availableToExercise * currentStockPrice;

@@ -78,7 +78,7 @@ export class AuthService {
     try {
       const decoded = JwtUtils.verifyToken(token);
       const user = await this.userRepository.findById(decoded.userId);
-      
+
       if (!user) {
         throw new ApiError(401, 'User not found');
       }
@@ -89,8 +89,8 @@ export class AuthService {
 
       return sanitizeUser(user);
     } catch (error) {
-      logger.warn('Token validation failed', { 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+      logger.warn('Token validation failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
       throw new ApiError(401, 'Invalid token');
     }
