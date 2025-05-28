@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: employee-stock-api
+  labels:
+    app: employee-stock-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: employee-stock-api
+  template:
+    metadata:
+      labels:
+        app: employee-stock-api
+    spec:
+      containers:
+        - name: employee-stock-api
+          image: ${DOCKER_REGISTRY}/employee-stock-api:${VERSION}
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: employee-stock-api-secrets
+                  key: jwt-secret
+            - name: JWT_EXPIRES_IN
+              value: "24h"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: CORS_ORIGIN
+              value: "*"
+            - name: AWS_REGION
+              value: "us-east-1"
+          envFrom:
+            - secretRef:
+                name: employee-stock-api-aws-secrets
+            - configMapRef:
+                name: employee-stock-api-config
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000

@@ -1,0 +1,139 @@
+openapi: 3.0.0
+info:
+  title: Employee Stock Dashboard API
+  description: API documentation for Employee Stock Dashboard
+  version: 1.0.0
+  
+servers:
+  - url: /api
+    description: API base URL
+    
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
+  schemas:
+    StockBalance:
+      type: object
+      properties:
+        employeeId:
+          type: string
+        totalGranted:
+          type: number
+        totalVested:
+          type: number
+        totalExercised:
+          type: number
+        availableToExercise:
+          type: number
+        unvested:
+          type: number
+        currentValue:
+          type: number
+        lastUpdated:
+          type: string
+          format: date-time
+          
+    StockGrant:
+      type: object
+      properties:
+        id:
+          type: string
+        employeeId:
+          type: string
+        grantDate:
+          type: string
+          format: date-time
+        totalShares:
+          type: number
+        vestingScheduleId:
+          type: string
+        grantPrice:
+          type: number
+        grantType:
+          type: string
+          enum: [iso, nso, rsu, espp]
+        status:
+          type: string
+          enum: [active, exercised, expired, cancelled]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          
+    VestingEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        grantId:
+          type: string
+        vestingDate:
+          type: string
+          format: date-time
+        sharesVested:
+          type: number
+        status:
+          type: string
+          enum: [pending, vested, cancelled]
+          
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+        employeeId:
+          type: string
+        grantId:
+          type: string
+        transactionType:
+          type: string
+          enum: [exercise, sale, grant, vest]
+        shares:
+          type: number
+        price:
+          type: number
+        date:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [pending, completed, failed, cancelled]
+          
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+        message:
+          type: string
+        error:
+          type: string
+          
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+            email:
+              type: string
+            name:
+              type: string
+            role:
+              type: string
+              enum: [employee, admin]
+              
+security:
+  - bearerAuth: []

@@ -5,12 +5,7 @@ import { ApiError } from '@/models';
 /**
  * Error handling middleware
  */
-export const errorHandler = (
-  error: any,
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
+export const errorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
   // Log the error
   logger.error('Unhandled error', {
     error: error.message,
@@ -63,9 +58,7 @@ export const errorHandler = (
   // Default error response
   res.status(500).json({
     success: false,
-    error: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
-      : error.message,
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : error.message,
     ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
   });
 };
@@ -104,7 +97,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
   // Log response when finished
   res.on('finish', () => {
     const duration = Date.now() - start;
-    
+
     logger.info('Request completed', {
       method: req.method,
       url: req.originalUrl,

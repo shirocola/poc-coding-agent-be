@@ -18,7 +18,7 @@ export class StockService {
   async getStockBalance(employeeId: string): Promise<StockBalance> {
     try {
       const balance = await this.stockRepository.calculateStockBalance(employeeId);
-      
+
       logger.info('Stock balance retrieved', {
         employeeId,
         totalGranted: balance.totalGranted,
@@ -42,7 +42,7 @@ export class StockService {
   async getStockGrants(employeeId: string): Promise<StockGrant[]> {
     try {
       const grants = await this.stockRepository.findGrantsByEmployeeId(employeeId);
-      
+
       logger.info('Stock grants retrieved', {
         employeeId,
         grantsCount: grants.length,
@@ -64,7 +64,7 @@ export class StockService {
   async getVestingSchedule(employeeId: string): Promise<VestingEvent[]> {
     try {
       const vestingEvents = await this.stockRepository.findVestingEventsByEmployeeId(employeeId);
-      
+
       // Sort by vesting date
       vestingEvents.sort((a, b) => a.vestingDate.getTime() - b.vestingDate.getTime());
 
@@ -89,7 +89,7 @@ export class StockService {
   async getTransactionHistory(employeeId: string): Promise<Transaction[]> {
     try {
       const transactions = await this.stockRepository.findTransactionsByEmployeeId(employeeId);
-      
+
       // Sort by transaction date (most recent first)
       transactions.sort((a, b) => b.transactionDate.getTime() - a.transactionDate.getTime());
 
@@ -111,7 +111,10 @@ export class StockService {
   /**
    * Get specific stock grant details
    */
-  async getStockGrantDetails(grantId: string, employeeId: string): Promise<{
+  async getStockGrantDetails(
+    grantId: string,
+    employeeId: string
+  ): Promise<{
     grant: StockGrant;
     vestingEvents: VestingEvent[];
     vestingSchedule: VestingSchedule | null;
@@ -128,7 +131,9 @@ export class StockService {
       }
 
       const vestingEvents = await this.stockRepository.findVestingEventsByGrantId(grantId);
-      const vestingSchedule = await this.stockRepository.findVestingScheduleById(grant.vestingScheduleId);
+      const vestingSchedule = await this.stockRepository.findVestingScheduleById(
+        grant.vestingScheduleId
+      );
 
       logger.info('Stock grant details retrieved', {
         grantId,
@@ -138,14 +143,16 @@ export class StockService {
 
       return {
         grant,
-        vestingEvents: vestingEvents.sort((a, b) => a.vestingDate.getTime() - b.vestingDate.getTime()),
+        vestingEvents: vestingEvents.sort(
+          (a, b) => a.vestingDate.getTime() - b.vestingDate.getTime()
+        ),
         vestingSchedule,
       };
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;
       }
-      
+
       logger.error('Failed to get stock grant details', {
         grantId,
         employeeId,
@@ -177,9 +184,7 @@ export class StockService {
 
       // Get upcoming vesting events (next 5)
       const now = new Date();
-      const upcomingVesting = vestingEvents
-        .filter(event => event.vestingDate > now)
-        .slice(0, 5);
+      const upcomingVesting = vestingEvents.filter(event => event.vestingDate > now).slice(0, 5);
 
       logger.info('Dashboard summary retrieved', {
         employeeId,

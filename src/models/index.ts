@@ -30,7 +30,7 @@ export class ApiError extends Error {
     this.status = status;
     this.code = code;
     this.details = details;
-    
+
     // Ensure stack trace is captured
     Error.captureStackTrace(this, this.constructor);
   }
