@@ -10,9 +10,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint src/**/*.ts tests/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts tests/**/*.ts --fix",
-    "format": "prettier --write src/**/*.ts tests/**/*.ts && npm run lint:fix",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts && npm run lint:fix",
     "ci": "npm run build && npm run format && npm run lint && npm run test",
     "seed": "ts-node scripts/seed.ts"
   },

@@ -65,4 +65,5 @@ app.get('/health', (req: express.Request, res: express.Response) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
+export { app };
 export default app;

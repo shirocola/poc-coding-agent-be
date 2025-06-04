@@ -1,10 +1,86 @@
 import { UserRepository } from '@/repositories';
-import { User, UserLogin, AuthResponse, UserResponse, ApiError } from '@/models';
+import {
+  User,
+  UserLogin,
+  UserRegistration,
+  AuthResponse,
+  UserResponse,
+  ApiError,
+  UserRole,
+} from '@/models';
 import { JwtUtils, PasswordUtils, sanitizeUser } from '@/utils';
 import logger from '@/logger';
 
 export class AuthService {
   constructor(private userRepository: UserRepository) {}
+
+  /**
+   * Register a new user
+   */
+  async register(registrationData: UserRegistration): Promise<AuthResponse> {
+    const { email, password, firstName, lastName, employeeId } = registrationData;
+
+    // Check if user already exists by email
+    const existingUserByEmail = await this.userRepository.findByEmail(email);
+    if (existingUserByEmail) {
+      logger.warn('Registration attempt with existing email', { email });
+      throw new ApiError(409, 'User with this email already exists');
+    }
+
+    // Check if user already exists by employeeId
+    const existingUserByEmployeeId = await this.userRepository.findByEmployeeId(employeeId);
+    if (existingUserByEmployeeId) {
+      logger.warn('Registration attempt with existing employee ID', { employeeId });
+      throw new ApiError(409, 'User with this employee ID already exists');
+    }
+
+    // Validate password strength
+    const passwordValidation = PasswordUtils.validatePasswordStrength(password);
+    if (!passwordValidation.isValid) {
+      logger.warn('Registration attempt with weak password', { email });
+      throw new ApiError(400, 'Password does not meet security requirements', 'WEAK_PASSWORD', {
+        errors: passwordValidation.errors,
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await PasswordUtils.hashPassword(password);
+
+    // Create user
+    const userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'> = {
+      email,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      employeeId,
+      role: UserRole.EMPLOYEE, // Default role for new registrations
+      isActive: true,
+    };
+
+    const user = await this.userRepository.create(userData);
+
+    // Generate JWT token
+    const accessToken = JwtUtils.generateAccessToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    logger.info('User registered successfully', {
+      userId: user.id,
+      email: user.email,
+      employeeId: user.employeeId,
+    });
+
+    const userResponse: UserResponse = sanitizeUser(user);
+
+    return {
+      user: userResponse,
+      tokens: {
+        accessToken,
+      },
+    };
+  }
 
   /**
    * Authenticate user and return JWT token

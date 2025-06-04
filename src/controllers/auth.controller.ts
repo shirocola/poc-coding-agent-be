@@ -1,10 +1,52 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '@/services';
-import { UserLogin, ApiResponse, AuthResponse, UserResponse } from '@/models';
+import { UserLogin, UserRegistration, ApiResponse, AuthResponse, UserResponse } from '@/models';
 import logger from '@/logger';
 
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  /**
+   * POST /auth/register
+   * Register a new user
+   */
+  register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const registrationData: UserRegistration = req.body;
+
+      // Basic validation
+      if (
+        !registrationData.email ||
+        !registrationData.password ||
+        !registrationData.firstName ||
+        !registrationData.lastName ||
+        !registrationData.employeeId
+      ) {
+        res.status(400).json({
+          success: false,
+          error: 'Email, password, firstName, lastName, and employeeId are required',
+        } as ApiResponse);
+        return;
+      }
+
+      const authResponse: AuthResponse = await this.authService.register(registrationData);
+
+      logger.info('Registration successful', {
+        userId: authResponse.user.id,
+        email: authResponse.user.email,
+        employeeId: authResponse.user.employeeId,
+        ip: req.ip,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: authResponse,
+        message: 'Registration successful',
+      } as ApiResponse<AuthResponse>);
+    } catch (error) {
+      next(error);
+    }
+  };
 
   /**
    * POST /auth/login
