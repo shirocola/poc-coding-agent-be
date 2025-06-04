@@ -12,6 +12,47 @@ const router: Router = express.Router();
 
 /**
  * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Register new user
+ *     description: Creates a new user account and returns JWT token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - firstName
+ *               - lastName
+ *               - employeeId
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 minLength: 8
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               employeeId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Registration successful
+ *       400:
+ *         description: Invalid input or weak password
+ *       409:
+ *         description: User already exists
+ */
+router.post('/register', authController.register);
+
+/**
+ * @swagger
  * /auth/login:
  *   post:
  *     summary: Login user

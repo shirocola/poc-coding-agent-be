@@ -16,6 +16,14 @@ export interface UserLogin {
   password: string;
 }
 
+export interface UserRegistration {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  employeeId: string;
+}
+
 export interface UserResponse {
   id: string;
   email: string;
